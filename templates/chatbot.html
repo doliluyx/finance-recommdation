@@ -1,0 +1,203 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>금융상품 AI 상담 | DoriFit</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,'Malgun Gothic',sans-serif;background:#f7f9f9;color:#26383d}
+header{height:70px;background:white;border-bottom:1px solid #e9eeee;display:flex;align-items:center;justify-content:space-between;padding:0 6%}
+.logo{width:120px}
+.header-right{display:flex;align-items:center;gap:20px;font-size:13px}
+.header-right a{text-decoration:none;color:#75858a}
+.main{height:calc(100vh - 70px);display:flex;flex-direction:column;max-width:1000px;margin:auto;position:relative}
+.top-title{text-align:center;padding:23px 15px 12px}
+.top-title h2{font-size:20px;margin:0 0 7px}
+.top-title p{font-size:12px;color:#89979b;margin:0}
+.chat-area{flex:1;overflow-y:auto;padding:20px 35px;display:flex;flex-direction:column;gap:23px}
+.message{display:flex;gap:12px;max-width:85%;align-items:flex-start}
+.message.user{align-self:flex-end;flex-direction:row-reverse}
+.avatar{width:34px;height:34px;flex-shrink:0;border-radius:50%;background:#e6f5f1;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:contain}
+.user .avatar{background:#dce9e7;color:#007f6c;font-weight:bold;font-size:13px}
+.bubble{padding:15px 18px;border-radius:15px;font-size:14px;line-height:1.8;white-space:pre-wrap;word-break:break-word}
+.bot .bubble{background:white;border:1px solid #e9eeee;border-top-left-radius:3px}
+.user .bubble{background:#009b83;color:white;border-top-right-radius:3px}
+.welcome{margin:auto;text-align:center;padding:20px}
+.welcome img{width:75px;height:75px;object-fit:contain;margin-bottom:12px}
+.welcome h2{font-size:23px;margin:5px 0 10px}
+.welcome p{font-size:14px;color:#89979b;line-height:1.7}
+.suggestions{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-top:22px}
+.suggestion{background:white;border:1px solid #dce8e5;padding:11px 15px;border-radius:22px;font-size:12px;color:#008e7b;cursor:pointer}
+.suggestion:hover{background:#eaf6f3}
+.input-wrapper{padding:12px 30px 22px;background:#f7f9f9}
+.input-box{background:white;border:1px solid #dce5e3;border-radius:17px;display:flex;align-items:center;padding:10px 12px 10px 20px;box-shadow:0 3px 15px #0000000a}
+.input-box textarea{flex:1;border:0;outline:none;resize:none;font-family:inherit;font-size:14px;padding:8px 0;max-height:120px;min-height:28px}
+.send{width:40px;height:40px;border:0;border-radius:11px;background:#009b83;color:white;font-size:19px;cursor:pointer}
+.send:disabled{background:#a9c9c2;cursor:not-allowed}
+.notice{text-align:center;color:#a0aaad;font-size:10px;margin-top:10px}
+.loading{color:#829097;font-size:13px;padding:10px}
+@media(max-width:600px){.chat-area{padding:15px}.input-wrapper{padding:10px 12px 15px}.message{max-width:95%}}
+</style>
+</head>
+<body>
+
+<header>
+    <a href="/main"><img src="/static/logo.png" class="logo" alt="로고"></a>
+    <div class="header-right">
+        <span>{{ member.name }}님</span>
+        <a href="/main">메인으로</a>
+    </div>
+</header>
+
+<div class="main">
+
+    <div class="top-title">
+        <h2>AI 금융상품 상담</h2>
+        <p>회원님의 금융정보를 바탕으로 맞춤형 상담을 제공합니다.</p>
+    </div>
+
+    <div class="chat-area" id="chatArea">
+        <div class="welcome" id="welcome">
+            <img src="/static/chatbot.png" alt="챗봇">
+            <h2>안녕하세요, {{ member.name }}님!</h2>
+            <p>하나은행 금융상품 AI 상담사입니다.<br>궁금한 금융상품이나 자산관리에 대해 질문해주세요.</p>
+
+            <div class="suggestions">
+                <button class="suggestion" onclick="sendSuggestion('나에게 맞는 예금상품을 추천해줘')">나에게 맞는 예금 추천</button>
+                <button class="suggestion" onclick="sendSuggestion('최고금리와 기본금리의 차이가 뭐야?')">금리 차이 설명</button>
+                <button class="suggestion" onclick="sendSuggestion('내 투자성향에 맞는 금융상품을 알려줘')">투자성향별 상품 추천</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="input-wrapper">
+        <div class="input-box">
+            <textarea id="userInput" placeholder="금융상품에 대해 무엇이든 물어보세요." rows="1" onkeydown="handleKey(event)"></textarea>
+            <button class="send" id="sendBtn" onclick="sendMessage()">↑</button>
+        </div>
+        <div class="notice">AI 답변은 참고용이며 실제 상품 가입 전 금융회사에서 최신 조건을 확인해주세요.</div>
+    </div>
+
+</div>
+
+<script>
+const chatArea=document.getElementById("chatArea");
+const userInput=document.getElementById("userInput");
+const sendBtn=document.getElementById("sendBtn");
+
+let isSending=false;
+
+function handleKey(event){
+    if(event.key==="Enter"&&!event.shiftKey){
+        event.preventDefault();
+        sendMessage();
+    }
+}
+
+function sendSuggestion(text){
+    userInput.value=text;
+    sendMessage();
+}
+
+function addMessage(text,type){
+
+    const welcome=document.getElementById("welcome");
+    if(welcome) welcome.remove();
+
+    const message=document.createElement("div");
+    message.className="message "+type;
+
+    const avatar=document.createElement("div");
+    avatar.className="avatar";
+
+    if(type==="bot"){
+        const img=document.createElement("img");
+        img.src="/static/chatbot.png";
+        img.alt="AI";
+        avatar.appendChild(img);
+    }else{
+        avatar.textContent="{{ member.name[0] }}";
+    }
+
+    const bubble=document.createElement("div");
+    bubble.className="bubble";
+    bubble.textContent=text;
+
+    message.appendChild(avatar);
+    message.appendChild(bubble);
+
+    chatArea.appendChild(message);
+    chatArea.scrollTop=chatArea.scrollHeight;
+
+    return message;
+}
+
+async function sendMessage(){
+
+    const message=userInput.value.trim();
+
+    if(!message||isSending)return;
+
+    isSending=true;
+    sendBtn.disabled=true;
+
+    addMessage(message,"user");
+
+    userInput.value="";
+    userInput.style.height="28px";
+
+    const loading=document.createElement("div");
+    loading.className="loading";
+    loading.textContent="AI가 답변을 작성하고 있습니다...";
+
+    chatArea.appendChild(loading);
+    chatArea.scrollTop=chatArea.scrollHeight;
+
+    try{
+
+        const response=await fetch("/chat",{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({message:message})
+        });
+
+        const data=await response.json();
+
+        loading.remove();
+
+        addMessage(
+            data.answer||"답변을 불러오지 못했습니다.",
+            "bot"
+        );
+
+    }catch(error){
+
+        loading.remove();
+
+        addMessage(
+            "서버와 연결할 수 없습니다. 잠시 후 다시 시도해주세요.",
+            "bot"
+        );
+
+        console.error(error);
+
+    }finally{
+
+        isSending=false;
+        sendBtn.disabled=false;
+        userInput.focus();
+
+    }
+}
+
+userInput.addEventListener("input",function(){
+    this.style.height="28px";
+    this.style.height=Math.min(this.scrollHeight,120)+"px";
+});
+</script>
+
+</body>
+</html>

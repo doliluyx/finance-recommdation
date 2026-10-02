@@ -1,0 +1,115 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DoriFit 금융상품 추천</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f8f8;font-family:Arial,'Malgun Gothic',sans-serif;color:#19313a}
+header{height:75px;background:white;display:flex;align-items:center;justify-content:space-between;padding:0 7%;border-bottom:1px solid #edf0f0}
+.logo{width:125px}
+.header-right{display:flex;align-items:center;gap:18px;font-size:13px}
+.logout{color:#74848a;text-decoration:none}
+.container{max-width:1200px;margin:auto;padding:45px 25px}
+.greeting{margin-bottom:30px}
+.greeting h1{font-size:29px;margin:0 0 10px}
+.greeting p{color:#829097;margin:0;font-size:14px}
+.profile-card{background:linear-gradient(110deg,#004d53,#008e7b);border-radius:18px;color:white;padding:25px 30px;display:flex;align-items:center;gap:20px;margin-bottom:40px}
+.profile-img{width:70px;height:70px;border-radius:50%;object-fit:cover;background:white;border:3px solid #ffffffb3}
+.profile-name{font-size:19px;font-weight:bold;margin-bottom:10px}
+.tags{display:flex;flex-wrap:wrap;gap:8px}
+.tag{background:#ffffff29;padding:6px 11px;border-radius:20px;font-size:12px}
+.section-title{font-size:22px;margin-bottom:8px}
+.section-desc{font-size:13px;color:#829097;margin-bottom:22px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.card{background:white;border:1px solid #edf0f0;border-radius:17px;padding:25px;transition:.2s;display:flex;flex-direction:column;min-height:300px}
+.card:hover{transform:translateY(-5px);box-shadow:0 12px 30px #0000000f}
+.bank{font-size:12px;color:#009b83;font-weight:bold}
+.product-name{font-size:18px;font-weight:bold;margin:15px 0;line-height:1.5}
+.rate-label{color:#89979b;font-size:12px}
+.rate{font-size:29px;color:#008e7b;font-weight:800;margin:5px 0 18px}
+.info{border-top:1px solid #edf0f0;padding-top:15px;font-size:12px;color:#78868b;line-height:2}
+.detail{display:block;text-align:center;background:#e9f6f3;color:#008e7b;padding:12px;border-radius:8px;margin-top:auto;text-decoration:none;font-size:13px;font-weight:bold}
+.empty{padding:35px;text-align:center;background:white;border-radius:15px;color:#829097}
+.chat-button{position:fixed;bottom:30px;right:35px;width:65px;height:65px;border-radius:50%;background:#009b83;display:flex;justify-content:center;align-items:center;box-shadow:0 5px 20px #0003;transition:.2s}
+.chat-button:hover{transform:scale(1.08)}
+.chat-button img{width:42px;height:42px;object-fit:contain}
+@media(max-width:850px){.cards{grid-template-columns:1fr 1fr}}
+@media(max-width:550px){.cards{grid-template-columns:1fr}.container{padding:30px 18px}.greeting h1{font-size:23px}.profile-card{padding:20px}}
+</style>
+</head>
+<body>
+
+<header>
+    <a href="/main"><img src="/static/logo.png" class="logo" alt="로고"></a>
+    <div class="header-right">
+        <span>{{ member.name }}님</span>
+        <a href="/logout" class="logout">로그아웃</a>
+    </div>
+</header>
+
+<div class="container">
+
+    <div class="greeting">
+        <h1>{{ member.name }}님, 반갑습니다.</h1>
+        <p>회원님의 금융정보를 바탕으로 맞춤형 상품을 추천해드립니다.</p>
+    </div>
+
+    <div class="profile-card">
+        <img src="{{ member.profile or '/static/logo.png' }}" class="profile-img" alt="프로필">
+        <div>
+            <div class="profile-name">{{ member.name }}님의 금융 프로필</div>
+            <div class="tags">
+                <span class="tag">{{ member.age }}세</span>
+                <span class="tag">{{ member.risk }}</span>
+                <span class="tag">{{ member.job }}</span>
+                <span class="tag">{{ member.income }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-title">✨ 회원님을 위한 추천 상품</div>
+    <div class="section-desc">나이, 투자성향, 직업 및 소득 정보를 반영한 금융상품입니다.</div>
+
+    {% if products %}
+    <div class="cards">
+        {% for p in products %}
+        <div class="card">
+            <div class="bank">{{ p.bank }}</div>
+            <div class="product-name">{{ p.name }}</div>
+
+            <div class="rate-label">최고금리 (연, 세전)</div>
+            <div class="rate">{{ p.max_rate }}%</div>
+
+            <div class="info">
+                <div>기본금리 : {{ p.base_rate }}%</div>
+                <div>가입기간 : {{ p.period }}</div>
+                <div>가입방법 : {{ p.method }}</div>
+                <div>가입대상 : {{ p.target }}</div>
+            </div>
+
+            {% if p.url %}
+            <a href="{{ p.url }}" target="_blank" rel="noopener noreferrer" class="detail">상품 자세히 보기 →</a>
+            {% else %}
+            <div class="detail">상세정보 없음</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty">
+        추천할 금융상품이 없습니다.<br>
+        static/예금목록.csv 파일을 확인해주세요.
+    </div>
+    {% endif %}
+
+</div>
+
+<a href="/chatbot" class="chat-button" title="금융상품 상담">
+    <img src="/static/chatbot.png" alt="챗봇">
+</a>
+
+</body>
+</html>

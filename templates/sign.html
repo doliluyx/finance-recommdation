@@ -1,0 +1,57 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DoriFit 로그인</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f8f8;font-family:Arial,'Malgun Gothic',sans-serif;color:#18313a}
+header{height:75px;padding:0 8%;display:flex;align-items:center;background:white}
+.logo{width:125px;object-fit:contain}
+.container{min-height:calc(100vh - 75px);display:flex;justify-content:center;align-items:center;padding:25px}
+.login-box{width:420px;background:white;border-radius:22px;padding:45px 40px;box-shadow:0 10px 40px #0000000d}
+h1{font-size:27px;margin:0 0 12px}
+.subtitle{color:#829097;font-size:14px;margin-bottom:35px}
+label{display:block;font-size:13px;font-weight:bold;margin:18px 0 8px}
+input{width:100%;height:48px;border:1px solid #dce4e6;border-radius:9px;padding:0 14px;font-size:14px;outline:none}
+input:focus{border-color:#009b83}
+button{width:100%;height:51px;border:0;border-radius:9px;background:#009b83;color:white;font-size:16px;font-weight:bold;margin-top:28px;cursor:pointer}
+button:hover{background:#007f6c}
+.signup{text-align:center;margin-top:24px;font-size:13px;color:#7d8b90}
+a{color:#009b83;text-decoration:none;font-weight:bold}
+.error{color:#d9534f;background:#fff0ef;padding:11px;border-radius:8px;font-size:13px;margin-bottom:15px}
+</style>
+</head>
+<body>
+<header>
+    <a href="/"><img src="/static/logo.png" class="logo" alt="로고"></a>
+</header>
+
+<div class="container">
+<div class="login-box">
+    <h1>나에게 맞는 금융상품</h1>
+    <div class="subtitle">당신의 금융생활에 맞는 상품을 찾아보세요.</div>
+
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <form action="/login" method="post">
+        <label>아이디</label>
+        <input type="text" name="userid" placeholder="아이디를 입력하세요" required>
+
+        <label>비밀번호</label>
+        <input type="password" name="password" placeholder="비밀번호를 입력하세요" required>
+
+        <button type="submit">로그인</button>
+    </form>
+
+    <div class="signup">
+        아직 회원이 아니신가요? <a href="/signup">회원가입</a>
+    </div>
+</div>
+</div>
+</body>
+</html>
